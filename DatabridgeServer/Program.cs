@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using DatabridgeServer.Data;
+using DatabridgeServer.Services.Products;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllers();
 // Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Services
+builder.Services.AddScoped<IProductService, ProductService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
