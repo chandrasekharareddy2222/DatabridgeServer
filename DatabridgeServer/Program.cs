@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using DatabridgeServer.Data;
 using DatabridgeServer.Services.Products;
+using DatabridgeServer.Services.Students;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register Services
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
