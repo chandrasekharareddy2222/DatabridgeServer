@@ -5,8 +5,8 @@ using DatabridgeServer.Services.Students;
 
 namespace DatabridgeServer.Controllers
 {
-    [ApiController]                     // ✅ MUST
-    [Route("api/[controller]")]          // ✅ MUST
+    [ApiController]                     
+    [Route("api/[controller]")]         
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;
@@ -16,7 +16,7 @@ namespace DatabridgeServer.Controllers
             _studentService = studentService;
         }
 
-        [HttpPost]                       // ✅ MUST
+        [HttpPost]                       
         public async Task<IActionResult> PostStudent([FromBody] Student student)
         {
             if (!ModelState.IsValid)
@@ -25,7 +25,7 @@ namespace DatabridgeServer.Controllers
             try
             {
                 await _studentService.InsertStudentAsync(student);
-                return Ok(new { message = "Student registered successfully 🎉" });
+                return Ok(new { message = "Student registered successfully " });
             }
             catch (SqlException ex)
             {
