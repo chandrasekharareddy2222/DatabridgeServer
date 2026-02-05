@@ -1,7 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using DatabridgeServer.Data;
+using DatabridgeServer.Services;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
+using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register Services
+
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 

@@ -11,6 +11,7 @@ namespace DatabridgeServer.Data
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<EmployeeResponse> EmployeeResponses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +26,8 @@ namespace DatabridgeServer.Data
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
+            // Configure EmployeeResponse as keyless entity for SP results
+            modelBuilder.Entity<EmployeeResponse>().HasNoKey();
         }
     }
 }
