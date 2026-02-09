@@ -44,12 +44,10 @@ namespace DatabridgeServer.Services
 
         public async Task<EmployeeResult> GetEmployeeByIdAsync(int empId)
         {
-            // Execute the Stored Procedure and map to List
             var result = await _context.EmployeeResults
                 .FromSqlInterpolated($"EXEC SP_GetEmployeeById @EmpId = {empId}")
                 .ToListAsync();
 
-            // Return the first match, or null if empty
             return result.FirstOrDefault();
         }
 

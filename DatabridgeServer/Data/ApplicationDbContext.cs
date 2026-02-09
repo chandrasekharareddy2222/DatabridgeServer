@@ -20,7 +20,7 @@ namespace DatabridgeServer.Data
 
         public DbSet<UpdateEmployeeRequest> UpdateEmployeeResponses { get; set; }
         public DbSet<DeleteEmployeeResponse> DeleteEmployeeResponses { get; set; }
-        // checking process
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,10 +30,8 @@ namespace DatabridgeServer.Data
             // Configure keyless entity types
             modelBuilder.Entity<EmployeeResponse>().HasNoKey();
             modelBuilder.Entity<EmployeeFullResponse>().HasNoKey();
-            //modelBuilder.Entity<EmployeeByIdResponse>().HasNoKey();
             modelBuilder.Entity<UpdateEmployeeRequest>().HasNoKey();
             modelBuilder.Entity<DeleteEmployeeResponse>().HasNoKey();
-            //checking process
             modelBuilder.Entity<EmployeeResult>().HasNoKey();
 
         }
