@@ -60,7 +60,6 @@ namespace DatabridgeServer.Models
     }
 
 
-    // i am checking
     namespace MyApi.Models
     {
         public class EmployeeResult

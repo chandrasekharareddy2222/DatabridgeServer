@@ -29,11 +29,6 @@ CREATE TABLE Employee
         REFERENCES Department(DeptId)
 );
 
-
-
-
-
-
 /*---------------------------------------------------------
         To Insert Employee Details (POST)
 -----------------------------------------------------------*/
@@ -46,30 +41,21 @@ CREATE OR ALTER PROCEDURE SP_AddEmployee
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    /* EmpName: Check for NULL or Empty */
     IF (@EmpName IS NULL OR LTRIM(RTRIM(@EmpName)) = '')
     BEGIN
         SELECT 'EmpName cannot be NULL or empty' AS Message;
         RETURN;
     END
-
-    /* EmpName: Check if it contains numbers 
-       (User requirement: "without numbers") */
     IF (@EmpName LIKE '%[0-9]%')
     BEGIN
         SELECT 'EmpName must not contain numbers' AS Message;
         RETURN;
     END
-
-    /* DeptName: Check for NULL or Empty */
     IF (@DeptName IS NULL OR LTRIM(RTRIM(@DeptName)) = '')
     BEGIN
         SELECT 'DeptName cannot be NULL or empty' AS Message;
         RETURN;
     END
-
-    /* DeptName: Check if it contains numbers */
     IF (@DeptName LIKE '%[0-9]%')
     BEGIN
         SELECT 'DeptName must not contain numbers' AS Message;
@@ -78,15 +64,11 @@ BEGIN
 
     DECLARE @DeptId INT;
     DECLARE @EmpId INT;
-
-    /* Check if Employee already exists */
     IF EXISTS (SELECT 1 FROM Employee WHERE EmpName = @EmpName)
     BEGIN
         SELECT 'Employee already exists' AS Message;
         RETURN;
     END
-
-    /* Get or Insert Department */
     SELECT @DeptId = DeptId FROM Department WHERE DeptName = @DeptName;
 
     IF @DeptId IS NULL
@@ -94,12 +76,8 @@ BEGIN
         INSERT INTO Department (DeptName) VALUES (@DeptName);
         SET @DeptId = SCOPE_IDENTITY();
     END
-
-    /* Insert Employee */
     INSERT INTO Employee (EmpName, DeptId)
     VALUES (@EmpName, @DeptId);
-
-    /* SUCCESS - Return ONLY the message (No columns, no joins) */
     SELECT 'Employee inserted successfully' AS Message;
 
 END;
@@ -135,6 +113,7 @@ EXEC SP_GetAllEmployeesFull;
 /*----------------------------------------------------------
            To Get Employee Details(GET)
 -----------------------------------------------------------*/
+
 go
 CREATE OR ALTER PROCEDURE SP_GetEmployeeById
 (
@@ -153,12 +132,7 @@ BEGIN
     WHERE e.EmpId = @EmpId;
 END;
 
-
-
-
-
 exec SP_GetEmployeeById 142
-
 
 
 /*----------------------------------------------------------------
@@ -173,8 +147,6 @@ CREATE OR ALTER PROCEDURE SP_UpdateEmployeeName
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    /* Validation */
     IF (@EmpId IS NULL OR @EmpId <= 0)
     BEGIN
         SELECT 'EmpId is required and must be greater than 0' AS Message;
@@ -192,15 +164,11 @@ BEGIN
         SELECT 'EmpName must start with an alphabet' AS Message;
         RETURN;
     END
-
-    /* Employee exists check */
     IF NOT EXISTS (SELECT 1 FROM Employee WHERE EmpId = @EmpId)
     BEGIN
         SELECT 'Employee not found' AS Message;
         RETURN;
     END
-
-    /* Duplicate name check */
     IF EXISTS (
         SELECT 1 
         FROM Employee 
@@ -210,17 +178,11 @@ BEGIN
         SELECT 'Employee with this name already exists' AS Message;
         RETURN;
     END
-
-    /* Update only EmpName */
     UPDATE Employee
     SET EmpName = @EmpName
     WHERE EmpId = @EmpId;
-
-    /* Success message only */
     SELECT 'Employee updated successfully' AS Message;
 END;
-
--- Update only the employee name by EmpId
 EXEC SP_UpdateEmployeeName 1, 'SeemaSimran';
 
 
@@ -238,8 +200,6 @@ CREATE or alter  PROCEDURE SP_DeleteEmployee
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    /* NULL validation */
     IF (@EmpId IS NULL OR @EmpId <= 0)
     BEGIN
         SELECT 
@@ -247,8 +207,6 @@ BEGIN
             'EmpId is required and must be greater than 0' AS Message;
         RETURN;
     END
-
-    /* Check if Employee exists */
     IF NOT EXISTS (SELECT 1 FROM Employee WHERE EmpId = @EmpId)
     BEGIN
         SELECT 
@@ -256,11 +214,7 @@ BEGIN
             'Employee not found' AS Message;
         RETURN;
     END
-
-    /* Delete Employee */
     DELETE FROM Employee WHERE EmpId = @EmpId;
-
-    /* Success response */
     SELECT 
         @EmpId AS EmpId,
         'Employee deleted successfully' AS Message;

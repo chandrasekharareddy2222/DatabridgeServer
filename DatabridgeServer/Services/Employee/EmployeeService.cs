@@ -1,5 +1,4 @@
-﻿
-using DatabridgeServer.Data;
+﻿using DatabridgeServer.Data;
 using DatabridgeServer.Models;
 using DatabridgeServer.Models.MyApi.Models;
 using Microsoft.Data.SqlClient;
@@ -20,7 +19,6 @@ namespace DatabridgeServer.Services
             _context = context;
         }
 
-        // CREATE: Add Employee (Stored Procedure)
 
         public async Task<MessageResponse> AddEmployeeAsync(AddEmployeeRequest request)
         {
@@ -32,7 +30,6 @@ namespace DatabridgeServer.Services
             return result.FirstOrDefault() ?? new MessageResponse { Message = "Error executing stored procedure" };
         }
 
-        // READ ALL: Get all employees with Dept details (Stored Procedure)
         public async Task<List<EmployeeFullResponse>> GetAllEmployeesFullAsync()
         {
             return await _context.EmployeeFullResponses
@@ -84,9 +81,6 @@ namespace DatabridgeServer.Services
             return message;
         }
 
-
-
-        // DELETE: Delete Employee (Stored Procedure)
         public async Task<DeleteEmployeeResponse> DeleteEmployeeAsync(int empId)
         {
             var result = (await _context.DeleteEmployeeResponses
@@ -100,12 +94,6 @@ namespace DatabridgeServer.Services
                 Message = "Error executing stored procedure"
             };
         }
-
-
-
-
-
-
 
     }
 }

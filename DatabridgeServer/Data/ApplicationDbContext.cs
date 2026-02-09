@@ -1,8 +1,7 @@
-﻿
-using DatabridgeServer.Models;
+﻿using DatabridgeServer.Models;
 using DatabridgeServer.Models.MyApi.Models;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.EntityFrameworkCore;
 namespace DatabridgeServer.Data
 {
     public class ApplicationDbContext : DbContext
@@ -26,8 +25,16 @@ namespace DatabridgeServer.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+           
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            });
 
-            // Configure keyless entity types
             modelBuilder.Entity<EmployeeResponse>().HasNoKey();
             modelBuilder.Entity<EmployeeFullResponse>().HasNoKey();
             modelBuilder.Entity<UpdateEmployeeRequest>().HasNoKey();

@@ -1,12 +1,14 @@
-﻿
-using DatabridgeServer.Data;
+﻿using DatabridgeServer.Data;
 using DatabridgeServer.Services;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddControllers();
 
 // EF Core
@@ -18,28 +20,30 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
-// ✅ SINGLE CORS POLICY (Angular)
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular",
-        policy =>
-        {
-            policy
-                .WithOrigins("http://localhost:4200")
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
+
+
 // Swagger
+builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Swagger (Dev only)
+
 if (app.Environment.IsDevelopment())
 {
+    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
@@ -48,12 +52,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// ⚠️ ORDER MATTERS
+app.UseHttpsRedirection();
+
 app.UseRouting();
 
-app.UseCors("AllowAngular");   // ✅ CORS HERE
+app.UseCors("AllowAll"); 
 
-//app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
