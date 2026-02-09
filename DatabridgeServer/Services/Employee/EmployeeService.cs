@@ -1,9 +1,12 @@
-﻿using DatabridgeServer.Data;
+﻿
+using DatabridgeServer.Data;
 using DatabridgeServer.Models;
+using DatabridgeServer.Models.MyApi.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Data;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DatabridgeServer.Services
@@ -12,51 +15,101 @@ namespace DatabridgeServer.Services
     {
         private readonly ApplicationDbContext _context;
 
-        private static readonly Regex AllowedCharactersRegex =
-            new(@"^[a-zA-Z_\-][a-zA-Z0-9\s\-_]*$");
-
         public EmployeeService(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<EmployeeResponse> AddEmployeeAsync(AddEmployeeRequest request)
+        // CREATE: Add Employee (Stored Procedure)
+
+        public async Task<MessageResponse> AddEmployeeAsync(AddEmployeeRequest request)
         {
-            // Business validations
-            if (request == null)
-                return new EmployeeResponse { Message = "Request body is required." };
-
-            if (string.IsNullOrWhiteSpace(request.EmpName))
-                return new EmployeeResponse { Message = "EmpName is required and cannot be empty." };
-
-            if (string.IsNullOrWhiteSpace(request.DeptName))
-                return new EmployeeResponse { Message = "DeptName is required and cannot be empty." };
-
-            if (!AllowedCharactersRegex.IsMatch(request.EmpName))
-                return new EmployeeResponse { Message = "EmpName contains invalid characters." };
-
-            if (!AllowedCharactersRegex.IsMatch(request.DeptName))
-                return new EmployeeResponse { Message = "DeptName contains invalid characters." };
-
-            var empNameParam = new SqlParameter("@EmpName", SqlDbType.VarChar, 50)
-            {
-                Value = request.EmpName
-            };
-
-            var deptNameParam = new SqlParameter("@DeptName", SqlDbType.VarChar, 50)
-            {
-                Value = request.DeptName
-            };
-
-            var result = await _context.EmployeeResponses
-                .FromSqlRaw("EXEC SP_AddEmployee @EmpName, @DeptName",
-                            empNameParam, deptNameParam)
+            var result = await _context.MessageResponses
+                .FromSqlRaw("EXEC SP_AddEmployee @EmpName={0}, @DeptName={1}", request.EmpName, request.DeptName)
+                .AsNoTracking()
                 .ToListAsync();
 
-            if (result.Count == 0)
-                return new EmployeeResponse { Message = "No response from stored procedure." };
-
-            return result[0];
+            return result.FirstOrDefault() ?? new MessageResponse { Message = "Error executing stored procedure" };
         }
+
+        // READ ALL: Get all employees with Dept details (Stored Procedure)
+        public async Task<List<EmployeeFullResponse>> GetAllEmployeesFullAsync()
+        {
+            return await _context.EmployeeFullResponses
+                .FromSqlRaw("EXEC SP_GetAllEmployeesFull")
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+
+        public async Task<EmployeeResult> GetEmployeeByIdAsync(int empId)
+        {
+            // Execute the Stored Procedure and map to List
+            var result = await _context.EmployeeResults
+                .FromSqlInterpolated($"EXEC SP_GetEmployeeById @EmpId = {empId}")
+                .ToListAsync();
+
+            // Return the first match, or null if empty
+            return result.FirstOrDefault();
+        }
+
+
+
+        public async Task<string> UpdateEmployeeNameAsync(int empId, string empName)
+        {
+            string message = string.Empty;
+
+            using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
+            {
+                using (var command = new SqlCommand("SP_UpdateEmployeeName", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.AddWithValue("@EmpId", empId);
+                    command.Parameters.AddWithValue("@EmpName", empName);
+
+                    await connection.OpenAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            var messageValue = reader["Message"];
+                            message = messageValue != DBNull.Value
+                                ? messageValue.ToString() ?? string.Empty
+                                : string.Empty;
+                        }
+                    }
+                }
+            }
+
+            return message;
+        }
+
+
+
+        // DELETE: Delete Employee (Stored Procedure)
+        public async Task<DeleteEmployeeResponse> DeleteEmployeeAsync(int empId)
+        {
+            var result = (await _context.DeleteEmployeeResponses
+                .FromSqlRaw("EXEC SP_DeleteEmployee @EmpId={0}", empId)
+                .AsNoTracking()
+                .ToListAsync())
+                .FirstOrDefault();
+
+            return result ?? new DeleteEmployeeResponse
+            {
+                Message = "Error executing stored procedure"
+            };
+        }
+
+
+
+
+
+
+
     }
 }
+
+
