@@ -16,16 +16,11 @@ namespace DatabridgeServer.Data
         public DbSet<EmployeeResponse> EmployeeResponses { get; set; }
         public DbSet<EmployeeFullResponse> EmployeeFullResponses { get; set; }
         public DbSet<EmployeeResult> EmployeeResults { get; set; }
-
         public DbSet<UpdateEmployeeRequest> UpdateEmployeeResponses { get; set; }
         public DbSet<DeleteEmployeeResponse> DeleteEmployeeResponses { get; set; }
-
-
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-           
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -40,7 +35,6 @@ namespace DatabridgeServer.Data
             modelBuilder.Entity<UpdateEmployeeRequest>().HasNoKey();
             modelBuilder.Entity<DeleteEmployeeResponse>().HasNoKey();
             modelBuilder.Entity<EmployeeResult>().HasNoKey();
-
         }
     }
 }
