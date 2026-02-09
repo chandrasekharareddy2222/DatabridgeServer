@@ -20,7 +20,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
-// Add CORS policy
+// Add CORS policy 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>

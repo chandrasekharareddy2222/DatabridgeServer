@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DatabridgeServer.Models
 {
-
     public class EmployeeFullResponse
     {
         public int EmpId { get; set; }
@@ -12,8 +11,6 @@ namespace DatabridgeServer.Models
         public int DeptId { get; set; }
         public string? DeptName { get; set; }
     }
-
-
 
     public class EmployeeResponse
     {
@@ -23,16 +20,13 @@ namespace DatabridgeServer.Models
         public string? Message { get; set; }
     }
 
-
     public class EmployeeByIdResponse
     {
-
         public string? EmpName { get; set; }
         public string? DeptName { get; set; }
         public string? Message { get; set; }
 
     }
-
     public class AddEmployeeRequest
     {
         [Required(ErrorMessage = "EmpName is required")]
@@ -41,12 +35,10 @@ namespace DatabridgeServer.Models
         [Required(ErrorMessage = "DeptName is required")]
         public string DeptName { get; set; } = string.Empty;
     }
-
     public class DeleteEmployeeResponse
     {
         public string? Message { get; set; }
     }
-
 
     public class UpdateEmployeeRequest
     {
@@ -59,7 +51,6 @@ namespace DatabridgeServer.Models
         public string Message { get; set; } = string.Empty;
     }
 
-
     namespace MyApi.Models
     {
         public class EmployeeResult
@@ -68,6 +59,5 @@ namespace DatabridgeServer.Models
             public string DeptName { get; set; }
         }
     }
-
 }
 
