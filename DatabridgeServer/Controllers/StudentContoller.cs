@@ -15,10 +15,9 @@ namespace DatabridgeServer.Controllers
         {
             _studentService = studentService;
         }
-
         [HttpPost("upload-excel")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadStudentExcel([FromForm] IFormFile file)
+        public async Task<IActionResult> UploadStudentExcel( IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File is required");
@@ -30,22 +29,12 @@ namespace DatabridgeServer.Controllers
                 if (extension == ".xlsx")
                 {
                     var count = await _studentService.UploadStudentsFromExcelAsync(file);
-
-                    return Ok(new
-                    {
-                        message = "Excel uploaded successfully",
-                        recordsInserted = count
-                    });
+                    return Ok(new { message = "Excel uploaded successfully", recordsInserted = count });
                 }
                 else if (extension == ".csv")
                 {
                     var count = await _studentService.UploadStudentsFromCsvAsync(file);
-
-                    return Ok(new
-                    {
-                        message = "CSV uploaded successfully",
-                        recordsInserted = count
-                    });
+                    return Ok(new { message = "CSV uploaded successfully", recordsInserted = count });
                 }
                 else
                 {
