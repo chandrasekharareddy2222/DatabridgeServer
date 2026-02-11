@@ -12,6 +12,7 @@ namespace DatabridgeServer.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
+
         public EmployeeController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
@@ -43,8 +44,8 @@ namespace DatabridgeServer.Controllers
         }
         [HttpPut("update-name/{empId}")]
         public async Task<IActionResult> UpdateEmployeeName(
-    int empId,
-    [FromBody] UpdateEmployeeRequest request)
+        int empId,
+        [FromBody] UpdateEmployeeRequest request)
         {
             var message = await _employeeService.UpdateEmployeeNameAsync(empId, request.EmpName);
             return Ok(new { message });
