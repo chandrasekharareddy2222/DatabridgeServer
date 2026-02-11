@@ -1,7 +1,6 @@
 ﻿using DatabridgeServer.Models;
 using DatabridgeServer.Models.MyApi.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 namespace DatabridgeServer.Data
 {
     public class ApplicationDbContext : DbContext
@@ -11,7 +10,8 @@ namespace DatabridgeServer.Data
         {
         }
 
-        public DbSet<Product> Products { get; set; } 
+        public DbSet<Product> Products { get; set; }
+
         public DbSet<MessageResponse> MessageResponses { get; set; }
         public DbSet<EmployeeResponse> EmployeeResponses { get; set; }
         public DbSet<EmployeeFullResponse> EmployeeFullResponses { get; set; }
@@ -21,6 +21,8 @@ namespace DatabridgeServer.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Configure Product entity
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -38,4 +40,3 @@ namespace DatabridgeServer.Data
         }
     }
 }
-
