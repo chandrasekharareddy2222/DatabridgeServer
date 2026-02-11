@@ -47,7 +47,7 @@ namespace DatabridgeServer.Controllers
         int empId,
         [FromBody] UpdateEmployeeRequest request)
         {
-            var message = await _employeeService.UpdateEmployeeNameAsync(empId, request.EmpName);
+            var message = await _employeeService.UpdateEmployeeNameAsync(empId, request.EmpName); 
             return Ok(new { message });
         }
         [HttpDelete("{empId}")]

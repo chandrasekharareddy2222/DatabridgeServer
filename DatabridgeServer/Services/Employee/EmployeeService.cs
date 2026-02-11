@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DatabridgeServer.Services
 {
-    public class EmployeeService : IEmployeeService
+    public class EmployeeService : IEmployeeService 
     {
         private readonly ApplicationDbContext _context;
 

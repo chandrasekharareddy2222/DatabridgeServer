@@ -11,7 +11,7 @@ namespace DatabridgeServer.Data
         {
         }
 
-        public DbSet<Product> Products { get; set; }
+        public DbSet<Product> Products { get; set; } 
         public DbSet<MessageResponse> MessageResponses { get; set; }
         public DbSet<EmployeeResponse> EmployeeResponses { get; set; }
         public DbSet<EmployeeFullResponse> EmployeeFullResponses { get; set; }

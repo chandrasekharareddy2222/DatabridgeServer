@@ -11,7 +11,7 @@ namespace DatabridgeServer.Models
         public int DeptId { get; set; }
         public string? DeptName { get; set; }
     }
-
+     
     public class EmployeeResponse
     {
         public int? EmpId { get; set; }
