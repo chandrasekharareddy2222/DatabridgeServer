@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using DatabridgeServer.Models;
 using DatabridgeServer.Services.Students;
@@ -16,7 +16,52 @@ namespace DatabridgeServer.Controllers
             _studentService = studentService;
         }
 
-        // POST (Already working)
+        [HttpPost("upload-excel")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadStudentExcel([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File is required");
+
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            try
+            {
+                if (extension == ".xlsx")
+                {
+                    var count = await _studentService.UploadStudentsFromExcelAsync(file);
+
+                    return Ok(new
+                    {
+                        message = "Excel uploaded successfully",
+                        recordsInserted = count
+                    });
+                }
+                else if (extension == ".csv")
+                {
+                    var count = await _studentService.UploadStudentsFromCsvAsync(file);
+
+                    return Ok(new
+                    {
+                        message = "CSV uploaded successfully",
+                        recordsInserted = count
+                    });
+                }
+                else
+                {
+                    return BadRequest("Only .xlsx or .csv files are allowed");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+
+
+
+        // POST
         [HttpPost]
         public async Task<IActionResult> PostStudent([FromBody] Student student)
         {
@@ -42,6 +87,7 @@ namespace DatabridgeServer.Controllers
         }
 
         // GET ALL
+        
         [HttpGet]
         public async Task<IActionResult> GetAllStudents()
         {
@@ -50,11 +96,11 @@ namespace DatabridgeServer.Controllers
                 var students = await _studentService.GetAllStudentsAsync();
                 return Ok(students);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return StatusCode(500, new
                 {
-                    message = "Internal server error. Please try again."
+                    message = "An unexpected error occurred while fetching students."
                 });
             }
         }

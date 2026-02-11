@@ -4,17 +4,13 @@ namespace DatabridgeServer.Services.Students
 {
     public interface IStudentService
     {
-        // POST (already working)
-        Task InsertStudentAsync(Student student);
+        Task<int> UploadStudentsFromExcelAsync(IFormFile file);
 
-        // GET
+        Task<int> UploadStudentsFromCsvAsync(IFormFile file);
+        Task InsertStudentAsync(Student student);
         Task<List<Student>> GetAllStudentsAsync();
         Task<Student?> GetStudentByIdAsync(int id);
-
-        // PUT
         Task<bool> UpdateStudentAsync(int id, Student student);
-
-        // DELETE
         Task<bool> DeleteStudentAsync(int id);
     }
 }

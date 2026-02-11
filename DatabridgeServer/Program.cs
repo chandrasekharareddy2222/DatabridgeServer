@@ -1,23 +1,38 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using DatabridgeServer.Data;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
-
+using DatabridgeServer.Swagger;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ===============================
+// EPPlus License (REQUIRED)
+// ===============================
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+// ===============================
+// Controllers
+// ===============================
 builder.Services.AddControllers();
 
-// Configure Entity Framework Core with SQL Server
+// ===============================
+// Entity Framework Core
+// ===============================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register Services
+// ===============================
+// Dependency Injection
+// ===============================
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 
-// Add CORS policy
+// ===============================
+// CORS
+// ===============================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -28,17 +43,22 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// ===============================
+// Swagger (Swashbuckle ONLY)
+// ===============================
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.OperationFilter<FileUploadOperationFilter>();
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// ===============================
+// Middleware Pipeline
+// ===============================
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
