@@ -1,14 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿    
 using DatabridgeServer.Data;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
-using DatabridgeServer.Swagger;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+
 using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ===============================
-// EPPlus License (REQUIRED)
+// EPPlus License
 // ===============================
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -21,8 +23,7 @@ builder.Services.AddControllers();
 // Entity Framework Core
 // ===============================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ===============================
 // Dependency Injection
@@ -44,12 +45,17 @@ builder.Services.AddCors(options =>
 });
 
 // ===============================
-// Swagger (Swashbuckle ONLY)
+// Swagger / OpenAPI
 // ===============================
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddSwaggerGen(c =>
 {
-    options.OperationFilter<FileUploadOperationFilter>();
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "DatabridgeServer API",
+        Version = "v1",
+        Description = "API endpoints for Students and Products"
+    });
 });
 
 var app = builder.Build();
@@ -59,6 +65,7 @@ var app = builder.Build();
 // ===============================
 if (app.Environment.IsDevelopment())
 {
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }
