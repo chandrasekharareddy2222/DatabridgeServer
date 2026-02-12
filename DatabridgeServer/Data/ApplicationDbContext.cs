@@ -11,12 +11,8 @@ namespace DatabridgeServer.Data
         }
 
         public DbSet<Product> Products { get; set; }
-        public DbSet<MessageResponse> MessageResponses { get; set; }
-        public DbSet<EmployeeResponse> EmployeeResponses { get; set; }
-        public DbSet<EmployeeFullResponse> EmployeeFullResponses { get; set; }
-        public DbSet<EmployeeResult> EmployeeResults { get; set; }
-        public DbSet<UpdateEmployeeRequest> UpdateEmployeeResponses { get; set; }
-        public DbSet<DeleteEmployeeResponse> DeleteEmployeeResponses { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,11 +27,8 @@ namespace DatabridgeServer.Data
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
-            modelBuilder.Entity<EmployeeResponse>().HasNoKey();
-            modelBuilder.Entity<EmployeeFullResponse>().HasNoKey();
-            modelBuilder.Entity<UpdateEmployeeRequest>().HasNoKey();
-            modelBuilder.Entity<DeleteEmployeeResponse>().HasNoKey();
-            modelBuilder.Entity<EmployeeResult>().HasNoKey();
+            modelBuilder.Entity<Employee>().HasNoKey();
+
         }
     }
 }

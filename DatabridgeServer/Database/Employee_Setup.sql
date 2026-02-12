@@ -1,13 +1,24 @@
 USE DatabridgeDB;
+/*-----------------------------------------------------------
+        Database: DatabridgeDB
+        Server :localhost\SQLEXPRESS
+------------------------------------------------------------*/
 
 
 
-CREATE TABLE Department
+/*----------------------------------------------------------
+                 TABLE: Department
+------------------------------------------------------------*/
+
+CREATE TABLE IT_Sector
 (
     DeptId INT IDENTITY(1,1) PRIMARY KEY,
     DeptName VARCHAR(50) NOT NULL UNIQUE
 );
 
+/*----------------------------------------------------------
+                 TABLE: Employee
+------------------------------------------------------------*/
 CREATE TABLE Employee
 (
     EmpId INT IDENTITY(1,1) PRIMARY KEY,
@@ -16,18 +27,14 @@ CREATE TABLE Employee
 
     CONSTRAINT FK_Employee_Department
         FOREIGN KEY (DeptId)
-        REFERENCES Department(DeptId)
+        REFERENCES IT_Sector(DeptId)
 );
-
-
-
-
 
 
 /*---------------------------------------------------------
         To Insert The Details (POST)
 -----------------------------------------------------------*/
-Go 
+Go
 CREATE OR ALTER PROCEDURE SP_AddEmployee
 (
     @EmpName  VARCHAR(50),
@@ -77,11 +84,11 @@ BEGIN
     END
 
     /* Get or Insert Department */
-    SELECT @DeptId = DeptId FROM Department WHERE DeptName = @DeptName;
+    SELECT @DeptId = DeptId FROM IT_Sector WHERE DeptName = @DeptName;
 
     IF @DeptId IS NULL
     BEGIN
-        INSERT INTO Department (DeptName) VALUES (@DeptName);
+        INSERT INTO IT_Sector (DeptName) VALUES (@DeptName);
         SET @DeptId = SCOPE_IDENTITY();
     END
 
@@ -89,22 +96,17 @@ BEGIN
     INSERT INTO Employee (EmpName, DeptId)
     VALUES (@EmpName, @DeptId);
 
-    /* SUCCESS - Return ONLY the message (No columns, no joins) */
+     /* SUCCESS - Return ONLY the message (No columns, no joins) */
     SELECT 'Employee inserted successfully' AS Message;
 
 END;
 
-
-
-
-exec SP_AddEmployee 'tharun','hr';
-
-
+exec SP_AddEmployee 'suresh','python';
 
 /*-----------------------------------------------------------
         To Fetch All The Details(GET)
 ------------------------------------------------------------*/
-Go
+go
 CREATE OR ALTER PROCEDURE SP_GetAllEmployeesFull
 AS
 BEGIN
@@ -116,17 +118,17 @@ BEGIN
         d.DeptId,
         d.DeptName
     FROM Employee e
-    JOIN Department d ON e.DeptId = d.DeptId;
+    JOIN IT_Sector d ON e.DeptId = d.DeptId;
 END;
-EXEC SP_GetAllEmployeesFull;
-
+--EXEC SP_GetAllEmployeesFull;
 
 
 /*----------------------------------------------------------
-           To Get Employee By EmpId Details(GET)
+           To Get Employee Details(GET)
 -----------------------------------------------------------*/
+
 Go
-CREATE OR ALTER PROCEDURE SP_GetEmployeeById
+CREATE OR Alter PROCEDURE SP_GetEmployeeById
 (
     @EmpId INT
 )
@@ -134,20 +136,23 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    IF NOT EXISTS (SELECT 1 FROM Employee WHERE EmpId = @EmpId)
+    BEGIN
+        SELECT 'Employee not found' AS Message;
+        RETURN;
+    END
+
     SELECT 
         e.EmpName,
         d.DeptName
     FROM Employee e
-    INNER JOIN Department d
+    INNER JOIN IT_Sector d
         ON e.DeptId = d.DeptId
     WHERE e.EmpId = @EmpId;
 END;
 
-
-
-
-
-exec SP_GetEmployeeById 142
+--exec SP_GetEmployeeById 255
+--EXEC SP_GetEmployeeById 3
 
 
 
@@ -158,7 +163,8 @@ Go
 CREATE OR ALTER PROCEDURE SP_UpdateEmployeeName
 (
     @EmpId INT,
-    @EmpName VARCHAR(50)
+    @EmpName VARCHAR(50),
+    @DeptName VARCHAR(50)
 )
 AS
 BEGIN
@@ -171,6 +177,7 @@ BEGIN
         RETURN;
     END
 
+    -- Validate EmpName
     IF (@EmpName IS NULL OR LTRIM(RTRIM(@EmpName)) = '')
     BEGIN
         SELECT 'EmpName cannot be NULL or empty' AS Message;
@@ -183,44 +190,56 @@ BEGIN
         RETURN;
     END
 
-    /* Employee exists check */
+    -- Validate DeptName
+    IF (@DeptName IS NULL OR LTRIM(RTRIM(@DeptName)) = '')
+    BEGIN
+        SELECT 'DeptName cannot be NULL or empty' AS Message;
+        RETURN;
+    END
+
+    IF (@DeptName NOT LIKE '[A-Za-z]%')
+    BEGIN
+        SELECT 'DeptName must start with an alphabet' AS Message;
+        RETURN;
+    END
+
+    -- Check Employee exists
     IF NOT EXISTS (SELECT 1 FROM Employee WHERE EmpId = @EmpId)
     BEGIN
         SELECT 'Employee not found' AS Message;
         RETURN;
     END
 
-    /* Duplicate name check */
-    IF EXISTS (
-        SELECT 1 
-        FROM Employee 
-        WHERE EmpName = @EmpName AND EmpId <> @EmpId
-    )
+    DECLARE @DeptId INT;
+
+    -- Check if Dept exists
+    SELECT @DeptId = DeptId FROM IT_Sector WHERE DeptName = @DeptName;
+
+    -- If Dept does not exist, create new one
+    IF @DeptId IS NULL
     BEGIN
-        SELECT 'Employee with this name already exists' AS Message;
-        RETURN;
+        INSERT INTO IT_Sector (DeptName)
+        VALUES (@DeptName);
+
+        SET @DeptId = SCOPE_IDENTITY();
     END
 
-    /* Update only EmpName */
+    -- Update Employee
     UPDATE Employee
-    SET EmpName = @EmpName
+    SET EmpName = @EmpName,
+        DeptId = @DeptId
     WHERE EmpId = @EmpId;
 
-    /* Success message only */
     SELECT 'Employee updated successfully' AS Message;
 END;
 
--- Update only the employee name by EmpId
-EXEC SP_UpdateEmployeeName 1, 'SeemaSimran';
-
-
-
+--EXEC SP_UpdateEmployeeName 34, 'Punjuri','hr';
 
 /*-----------------------------------------------------------------
-        To Delete The Employees Details By Getting EmpId (PUT)
+        To Delete The Employees Details (PUT)
 -------------------------------------------------------------------*/
-Go
-CREATE or alter  PROCEDURE SP_DeleteEmployee
+go
+CREATE OR ALTER PROCEDURE SP_DeleteEmployee
 (
     @EmpId INT
 )
@@ -228,39 +247,24 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    /* NULL validation */
     IF (@EmpId IS NULL OR @EmpId <= 0)
     BEGIN
-        SELECT 
-            @EmpId AS EmpId,
-            'EmpId is required and must be greater than 0' AS Message;
+        SELECT 'EmpId is required and must be greater than 0' AS Message;
         RETURN;
     END
 
-    /* Check if Employee exists */
     IF NOT EXISTS (SELECT 1 FROM Employee WHERE EmpId = @EmpId)
     BEGIN
-        SELECT 
-            @EmpId AS EmpId,
-            'Employee not found' AS Message;
+        SELECT 'Employee not found' AS Message;
         RETURN;
     END
 
-    /* Delete Employee */
     DELETE FROM Employee WHERE EmpId = @EmpId;
 
-    /* Success response */
-    SELECT 
-        @EmpId AS EmpId,
-        'Employee deleted successfully' AS Message;
+    SELECT 'Employee deleted successfully' AS Message;
 END;
 
-exec SP_DeleteEmployee 66
+--exec SP_DeleteEmployee 66
 
-
-
-
-select * from Employee;
-select * from Department;
-
-
+--SELECT * FROM IT_Sector;
+--SELECT * FROM Employee;
