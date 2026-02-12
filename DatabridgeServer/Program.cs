@@ -44,19 +44,13 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddOpenApi();
+
 // ===============================
 // Swagger / OpenAPI
 // ===============================
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "DatabridgeServer API",
-        Version = "v1",
-        Description = "API endpoints for Students and Products"
-    });
-});
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
