@@ -3,31 +3,26 @@ using DatabridgeServer.Services;
 using DatabridgeServer.Services.Employees;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
-<<<<<<< HEAD
 using DatabridgeServer.Services.Members;
-=======
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
->>>>>>> b64c7a281770773ba02c105abcde7759d6c8f877
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllers();
 
 // Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
 
 // Register Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-<<<<<<< HEAD
-builder.Services.AddScoped<IMemberService, MemberService>();
-=======
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
->>>>>>> b64c7a281770773ba02c105abcde7759d6c8f877
+builder.Services.AddScoped<IMemberService, MemberService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -40,14 +35,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// OpenAPI / Swagger
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
