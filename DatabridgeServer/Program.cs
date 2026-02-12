@@ -1,44 +1,33 @@
-using DatabridgeServer.Data;
+﻿using DatabridgeServer.Data;
 using DatabridgeServer.Services;
 using DatabridgeServer.Services.Employees;
+using DatabridgeServer.Services.Members;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
-using DatabridgeServer.Services.Members;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-
 using OfficeOpenXml;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ===============================
 // EPPlus License
-// ===============================
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-// ===============================
-// Controllers
-// ===============================
+// Add services to the container.
 builder.Services.AddControllers();
 
-// ===============================
-// Entity Framework Core
-// ===============================
+// Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ===============================
-// Dependency Injection
-// ===============================
+// Register Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
-// ===============================
-// CORS
-// ===============================
+// Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -49,21 +38,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
-// ===============================
-// Swagger / OpenAPI
-// ===============================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ===============================
-// Middleware Pipeline
-// ===============================
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
 }
