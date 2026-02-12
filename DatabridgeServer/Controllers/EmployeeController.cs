@@ -1,58 +1,65 @@
-﻿using DatabridgeServer.Models;
-using DatabridgeServer.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using DatabridgeServer.Models;
+using DatabridgeServer.Services.Employees;
 
 namespace DatabridgeServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeeController : ControllerBase
+    public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
 
-        public EmployeeController(IEmployeeService employeeService)
+        public EmployeesController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
         }
 
-        [HttpGet("get-all-full")]
-        public async Task<IActionResult> GetAllEmployees()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
-            var result = await _employeeService.GetAllEmployeesFullAsync();
-            return Ok(result);
+            var employees = await _employeeService.GetAllEmployeesAsync();
+            return Ok(employees);
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> AddEmployee([FromBody] AddEmployeeRequest request)
+        [HttpGet("get-employee/{empId}")]
+        public async Task<IActionResult> GetEmployee(int empId)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await _employeeService.AddEmployeeAsync(request);
-            return Ok(result);
+            var result = await _employeeService.GetEmployeeByIdAsync(empId);
+
+            if (result.employee == null)
+                return NotFound(new { message = result.message });
+
+            return Ok(result.employee);
         }
-        [HttpGet("GetById/{id}")]
-        public async Task<IActionResult> GetEmployeeById(int id)
+
+        [HttpPost("add-employee")]
+        public async Task<IActionResult> AddEmployee([FromBody] Employee request)
         {
-            var employee = await _employeeService.GetEmployeeByIdAsync(id);
-            if (employee == null)
-            {
-                return NotFound("Employee not found.");
-            }
-            return Ok(employee);
-        }
-        [HttpPut("update-name/{empId}")]
-        public async Task<IActionResult> UpdateEmployeeName(
-        int empId,
-        [FromBody] UpdateEmployeeRequest request)
-        {
-            var message = await _employeeService.UpdateEmployeeNameAsync(empId, request.EmpName);
+            var message = await _employeeService
+                .AddEmployeeAsync(request.EmpName, request.DeptName);
+
             return Ok(new { message });
         }
-        [HttpDelete("{empId}")]
+
+        [HttpPut("update-employee/{empId}")]
+        public async Task<IActionResult> UpdateEmployee(
+    int empId,
+    [FromBody] Employee request)
+        {
+            var message = await _employeeService
+                .UpdateEmployeeAsync(empId, request.EmpName, request.DeptName);
+
+            return Ok(new { message });
+        }
+
+
+        [HttpDelete("delete-employee/{empId}")]
         public async Task<IActionResult> DeleteEmployee(int empId)
         {
-            var result = await _employeeService.DeleteEmployeeAsync(empId);
-            return Ok(result);
+            var message = await _employeeService.DeleteEmployeeAsync(empId);
+
+            return Ok(new { message });
         }
     }
 }

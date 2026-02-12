@@ -1,14 +1,9 @@
 ﻿using DatabridgeServer.Data;
 using DatabridgeServer.Models;
-using DatabridgeServer.Models.MyApi.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DatabridgeServer.Services
+namespace DatabridgeServer.Services.Employees
 {
     public class EmployeeService : IEmployeeService
     {
@@ -19,82 +14,138 @@ namespace DatabridgeServer.Services
             _context = context;
         }
 
-
-        public async Task<MessageResponse> AddEmployeeAsync(AddEmployeeRequest request)
+        public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
         {
-            var result = await _context.MessageResponses
-                .FromSqlRaw("EXEC SP_AddEmployee @EmpName={0}, @DeptName={1}", request.EmpName, request.DeptName)
-                .AsNoTracking()
-                .ToListAsync();
-
-            return result.FirstOrDefault() ?? new MessageResponse { Message = "Error executing stored procedure" };
-        }
-
-        public async Task<List<EmployeeFullResponse>> GetAllEmployeesFullAsync()
-        {
-            return await _context.EmployeeFullResponses
+            return await _context.Employees
                 .FromSqlRaw("EXEC SP_GetAllEmployeesFull")
-                .AsNoTracking()
                 .ToListAsync();
         }
-
-
-        public async Task<EmployeeResult> GetEmployeeByIdAsync(int empId)
+        public async Task<(Employee employee, string message)> GetEmployeeByIdAsync(int empId)
         {
-            var result = await _context.EmployeeResults
-                .FromSqlInterpolated($"EXEC SP_GetEmployeeById @EmpId = {empId}")
-                .ToListAsync();
-
-            return result.FirstOrDefault();
-        }
-
-
-
-        public async Task<string> UpdateEmployeeNameAsync(int empId, string empName)
-        {
-            string message = string.Empty;
-
-            using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
+            using (var connection = _context.Database.GetDbConnection())
             {
-                using (var command = new SqlCommand("SP_UpdateEmployeeName", connection))
+                using (var command = connection.CreateCommand())
                 {
+                    command.CommandText = "SP_GetEmployeeById";
                     command.CommandType = CommandType.StoredProcedure;
 
-                    command.Parameters.AddWithValue("@EmpId", empId);
-                    command.Parameters.AddWithValue("@EmpName", empName);
+                    command.Parameters.Add(new SqlParameter("@EmpId", empId));
 
-                    await connection.OpenAsync();
+                    if (connection.State != ConnectionState.Open)
+                        await connection.OpenAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (!reader.HasRows)
+                            return (null, "No data returned");
+
+                        await reader.ReadAsync();
+
+                        if (reader.FieldCount == 1)
+                        {
+                            return (null, reader.GetString(0));
+                        }
+
+                        var employee = new Employee
+                        {
+                            EmpName = reader["EmpName"].ToString(),
+                            DeptName = reader["DeptName"].ToString()
+                        };
+
+                        return (employee, null);
+                    }
+                }
+            }
+        }
+        public async Task<string> AddEmployeeAsync(string empName, string deptName)
+        {
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SP_AddEmployee";
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.Add(new SqlParameter("@EmpName", empName));
+                    command.Parameters.Add(new SqlParameter("@DeptName", deptName));
+
+                    if (connection.State != ConnectionState.Open)
+                        await connection.OpenAsync();
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
                         {
-                            var messageValue = reader["Message"];
-                            message = messageValue != DBNull.Value
-                                ? messageValue.ToString() ?? string.Empty
-                                : string.Empty;
+                            return reader["Message"].ToString();
                         }
                     }
+
+                    return "No response from database";
                 }
             }
-
-            return message;
         }
 
-        public async Task<DeleteEmployeeResponse> DeleteEmployeeAsync(int empId)
+        public async Task<string> UpdateEmployeeAsync(int empId, string empName, string deptName)
         {
-            var result = (await _context.DeleteEmployeeResponses
-                .FromSqlRaw("EXEC SP_DeleteEmployee @EmpId={0}", empId)
-                .AsNoTracking()
-                .ToListAsync())
-                .FirstOrDefault();
-
-            return result ?? new DeleteEmployeeResponse
+            using (var connection = _context.Database.GetDbConnection())
             {
-                Message = "Error executing stored procedure"
-            };
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SP_UpdateEmployeeName";
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.Add(new SqlParameter("@EmpId", empId));
+                    command.Parameters.Add(new SqlParameter("@EmpName", empName));
+                    command.Parameters.Add(new SqlParameter("@DeptName", deptName));
+
+                    if (connection.State != ConnectionState.Open)
+                        await connection.OpenAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            return reader["Message"].ToString();
+                        }
+                    }
+
+                    return "No response from database";
+                }
+            }
         }
+
+
+
+        public async Task<string> DeleteEmployeeAsync(int empId)
+        {
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SP_DeleteEmployee";
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.Add(new SqlParameter("@EmpId", empId));
+
+                    if (connection.State != ConnectionState.Open)
+                        await connection.OpenAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            return reader["Message"].ToString();
+                        }
+                    }
+
+                    return "No response from database";
+                }
+            }
+        }
+
+
+
+
 
     }
 }
-
