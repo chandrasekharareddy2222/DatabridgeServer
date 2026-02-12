@@ -191,6 +191,103 @@ END;
 GO
 
 /* ===========================
+   TABLE TYPE FOR BULK DELETE
+=========================== */
+IF TYPE_ID(N'dbo.StudentIdTableType') IS NULL
+BEGIN
+    CREATE TYPE dbo.StudentIdTableType AS TABLE
+    (
+        StudentID INT PRIMARY KEY
+    );
+END;
+GO
+
+
+
+
+/* ===========================
+   ENHANCED BULK DELETE SP
+   - Deletes multiple students using TVP
+   - Returns deleted row count
+   - Returns missing StudentIDs
+=========================== */
+CREATE OR ALTER PROCEDURE dbo.DeleteStudentsBatchEnhanced
+    @StudentIds dbo.StudentIdTableType READONLY,
+    @RowsAffected INT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    /* ---------------------------
+       STEP 1: Identify missing IDs
+    --------------------------- */
+    ;WITH MissingIDs AS
+    (
+        SELECT t.StudentID
+        FROM @StudentIds t
+        LEFT JOIN dbo.Student s
+            ON t.StudentID = s.StudentID
+        WHERE s.StudentID IS NULL
+    )
+    SELECT * INTO #MissingIDsTemp FROM MissingIDs;
+
+    /* ---------------------------
+       STEP 2: Delete existing IDs
+    --------------------------- */
+    DELETE s
+    FROM dbo.Student s
+    INNER JOIN @StudentIds t
+        ON s.StudentID = t.StudentID;
+
+    /* ---------------------------
+       STEP 3: Return number of rows deleted
+    --------------------------- */
+    SET @RowsAffected = @@ROWCOUNT;
+
+    /* ---------------------------
+       STEP 4: Return missing IDs if any
+    --------------------------- */
+    IF EXISTS (SELECT 1 FROM #MissingIDsTemp)
+    BEGIN
+        SELECT StudentID AS MissingID
+        FROM #MissingIDsTemp;
+    END
+
+    DROP TABLE #MissingIDsTemp;
+END;
+GO
+
+/* ===========================
+   QUICK VERIFICATION
+=========================== */
+
+
+-- Table variable to hold multiple student IDs for bulk deletion
+DECLARE @IdsToDelete dbo.StudentIdTableType;
+
+-- Add IDs to delete (include some missing to test missing IDs return)
+INSERT INTO @IdsToDelete (StudentID)
+VALUES (1), (2), (999);  -- 999 does NOT exist
+
+DECLARE @DeletedCount INT;
+
+-- Execute Enhanced Bulk Delete
+EXEC dbo.DeleteStudentsBatchEnhanced
+    @StudentIds = @IdsToDelete,
+    @RowsAffected = @DeletedCount OUTPUT;
+
+-- Show number of rows actually deleted
+SELECT @DeletedCount AS DeletedRows;
+
+-- Any missing IDs will be returned automatically by the SP
+-- (SP returns a result set with column MissingID)
+
+
+
+
+
+
+/* ===========================
    QUICK VERIFICATION
 =========================== */
 SELECT * FROM Department;
