@@ -282,6 +282,65 @@ namespace DatabridgeServer.Services.Students
             await command.ExecuteNonQueryAsync();
 
             return (int)rowsAffected.Value > 0;
+
+           
+
+
         }
+
+
+        public async Task<(int RowsDeleted, List<int> MissingIds)> DeleteStudentsBatchAsync(List<int> studentIds)
+        {
+            if (studentIds == null || studentIds.Count == 0)
+                return (0, new List<int>());
+
+            // Create a DataTable for the TVP
+            var dataTable = new DataTable();
+            dataTable.Columns.Add("StudentID", typeof(int));
+
+            foreach (var id in studentIds)
+            {
+                dataTable.Rows.Add(id);
+            }
+
+            var paramIds = new SqlParameter("@StudentIds", SqlDbType.Structured)
+            {
+                TypeName = "dbo.StudentIdTableType",
+                Value = dataTable
+            };
+
+            var paramRowsAffected = new SqlParameter("@RowsAffected", SqlDbType.Int)
+            {
+                Direction = ParameterDirection.Output
+            };
+
+            var missingIds = new List<int>();
+
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+            using (var command = new SqlCommand("dbo.DeleteStudentsBatchEnhanced", connection))
+            {
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.Add(paramIds);
+                command.Parameters.Add(paramRowsAffected);
+
+                await connection.OpenAsync();
+
+                // Read missing IDs if the SP returns them
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        missingIds.Add(reader.GetInt32(0));
+                    }
+                }
+
+                await connection.CloseAsync();
+            }
+
+            int rowsDeleted = (int)paramRowsAffected.Value;
+
+            return (rowsDeleted, missingIds);
+        }
+
     }
 }

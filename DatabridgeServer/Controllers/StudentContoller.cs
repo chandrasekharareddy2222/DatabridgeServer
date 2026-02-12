@@ -170,5 +170,27 @@ namespace DatabridgeServer.Controllers
                 });
             }
         }
+
+        [HttpPost("DeleteBatch")]
+        public async Task<IActionResult> DeleteStudentsBatch([FromBody] List<int> studentIds)
+        {
+            if (studentIds == null || studentIds.Count == 0)
+                return BadRequest(new { message = "No Student IDs provided." });
+
+            try
+            {
+                var (rowsDeleted, missingIds) = await _studentService.DeleteStudentsBatchAsync(studentIds);
+
+                return Ok(new
+                {
+                    DeletedRows = rowsDeleted,
+                    MissingIds = missingIds
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error.", error = ex.Message });
+            }
+        }
     }
 }
