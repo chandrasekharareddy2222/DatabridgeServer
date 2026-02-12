@@ -11,6 +11,8 @@ namespace DatabridgeServer.Data
         }
 
         public DbSet<Product> Products { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,6 +27,8 @@ namespace DatabridgeServer.Data
                 entity.Property(e => e.Price).HasColumnType("decimal(18,2)");
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
+            modelBuilder.Entity<Employee>().HasNoKey();
+
         }
     }
 }
