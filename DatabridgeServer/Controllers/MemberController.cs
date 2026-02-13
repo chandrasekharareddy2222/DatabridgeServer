@@ -16,6 +16,27 @@ namespace DatabridgeServer.Controllers
             _MemberService = MemberService;
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllMembers()
+        {
+            var result = await _MemberService.GetAllMembersAsync();
+            return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMemberById(int id)
+        {
+            var result = await _MemberService.GetMemberByIdAsync(id);
+
+            if (result == null)
+                return NotFound($"Member with ID {id} not found");
+
+            return Ok(result);
+        }
+
+
+
         [HttpPost]
         public async Task<IActionResult> PostMember(MemberBookDto dto)
         {
@@ -29,6 +50,66 @@ namespace DatabridgeServer.Controllers
 
             return Ok(new { message });
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateMember(int id, [FromBody] MemberBookDto dto)
+        {
+
+            if (dto == null)
+                return BadRequest("Request body cannot be empty");
+
+          
+            if (string.IsNullOrWhiteSpace(dto.MemberName))
+                return BadRequest("MemberName is required");
+
+            if (dto.MemberAge <= 0)
+                return BadRequest("MemberAge must be greater than 0");
+
+            if (string.IsNullOrWhiteSpace(dto.Bookname))
+                return BadRequest("Bookname is required");
+
+            
+            var result = await _MemberService.UpdateMemberAsync(id, dto);
+
+            if (result != "SUCCESS")
+                return BadRequest(result);
+
+            return Ok(new { message = "Member updated successfully" });
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMember(int id)
+        {
+            var result = await _MemberService.DeleteMemberAsync(id);
+
+            if (result == "NOT FOUND")
+                return NotFound($"Member with ID {id} not found");
+
+            if (result != "SUCCESS")
+                return BadRequest(result);
+
+            return Ok(new { message = "Member deleted successfully" });
+        }
+        [HttpDelete("bulk")]
+        public async Task<IActionResult> DeleteMultipleMembers([FromBody] DeleteMembersDto dto)
+        {
+            if (dto == null || dto.MemberIds == null || !dto.MemberIds.Any())
+                return BadRequest("MemberIds are required");
+
+            var deletedCount = await _MemberService.DeleteMembersAsync(dto.MemberIds);
+
+            if (deletedCount == 0)
+                return NotFound("No members found to delete");
+
+            return Ok(new
+            {
+                message = $"{deletedCount} member(s) deleted successfully"
+            });
+        }
+
+
+
 
 
 

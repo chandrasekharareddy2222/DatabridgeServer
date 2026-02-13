@@ -14,7 +14,7 @@ CREATE TABLE Members
    FOREIGN KEY (Bookid) REFERENCES Books(Bookid)
 );
 
-ALTER PROCEDURE InsertMemberandBooks
+ CREATE OR ALTER PROCEDURE InsertMemberandBooks
 (
     @BookName   VARCHAR(50),
     @MemberName VARCHAR(50),

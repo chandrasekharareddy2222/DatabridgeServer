@@ -4,6 +4,8 @@ namespace DatabridgeServer.Models
 {
     public class MemberBookDto
     {
+        
+
         [Required]
         public string Bookname { get; set; }
 
