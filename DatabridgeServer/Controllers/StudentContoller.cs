@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using DatabridgeServer.Models;
 using DatabridgeServer.Services.Students;
@@ -15,9 +15,13 @@ namespace DatabridgeServer.Controllers
         {
             _studentService = studentService;
         }
+
+        // ==============================
+        // UPLOAD EXCEL/CSV
+        // ==============================
         [HttpPost("upload-excel")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadStudentExcel( IFormFile file)
+        public async Task<IActionResult> UploadStudentExcel(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("File is required");
@@ -47,10 +51,9 @@ namespace DatabridgeServer.Controllers
             }
         }
 
-
-
-
-        // POST
+        // ==============================
+        // CREATE STUDENT
+        // ==============================
         [HttpPost]
         public async Task<IActionResult> PostStudent([FromBody] Student student)
         {
@@ -68,15 +71,13 @@ namespace DatabridgeServer.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new
-                {
-                    message = "Internal server error. Please try again."
-                });
+                return StatusCode(500, new { message = "Internal server error. Please try again." });
             }
         }
 
-        // GET ALL
-        
+        // ==============================
+        // GET ALL STUDENTS
+        // ==============================
         [HttpGet]
         public async Task<IActionResult> GetAllStudents()
         {
@@ -85,16 +86,15 @@ namespace DatabridgeServer.Controllers
                 var students = await _studentService.GetAllStudentsAsync();
                 return Ok(students);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, new
-                {
-                    message = "An unexpected error occurred while fetching students."
-                });
+                return StatusCode(500, new { message = "An unexpected error occurred while fetching students." });
             }
         }
 
-        // GET BY ID
+        // ==============================
+        // GET STUDENT BY ID
+        // ==============================
         [HttpGet("{id}")]
         public async Task<IActionResult> GetStudentById(int id)
         {
@@ -109,14 +109,13 @@ namespace DatabridgeServer.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new
-                {
-                    message = "Internal server error. Please try again."
-                });
+                return StatusCode(500, new { message = "Internal server error. Please try again." });
             }
         }
 
-        // PUT
+        // ==============================
+        // UPDATE STUDENT
+        // ==============================
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateStudent(int id, [FromBody] Student student)
         {
@@ -138,14 +137,13 @@ namespace DatabridgeServer.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new
-                {
-                    message = "Internal server error. Please try again."
-                });
+                return StatusCode(500, new { message = "Internal server error. Please try again." });
             }
         }
 
-        // DELETE
+        // ==============================
+        // DELETE STUDENT
+        // ==============================
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
@@ -164,14 +162,14 @@ namespace DatabridgeServer.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new
-                {
-                    message = "Internal server error. Please try again."
-                });
+                return StatusCode(500, new { message = "Internal server error. Please try again." });
             }
         }
 
-        [HttpPost("DeleteBatch")]
+        // ==============================
+        // BATCH DELETE STUDENTS
+        // ==============================
+        [HttpPost("delete-batch")]
         public async Task<IActionResult> DeleteStudentsBatch([FromBody] List<int> studentIds)
         {
             if (studentIds == null || studentIds.Count == 0)

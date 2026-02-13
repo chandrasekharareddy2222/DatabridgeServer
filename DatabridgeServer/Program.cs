@@ -5,20 +5,18 @@ using DatabridgeServer.Services.Members;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Extensions.Options;
 using OfficeOpenXml;
-
-
+// Set EPPlus license (REQUIRED for EPPlus 8+)
+ExcelPackage.License.SetNonCommercialPersonal("Devaraj");
 
 var builder = WebApplication.CreateBuilder(args);
 
-// EPPlus License
-ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
 
 // Add services to the container.
 builder.Services.AddControllers();
-
-
 
 // Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

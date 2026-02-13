@@ -1,4 +1,4 @@
-﻿using DatabridgeServer.Models;
+using DatabridgeServer.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,7 @@ namespace DatabridgeServer.Services.Students
             if (file == null || file.Length == 0)
                 throw new Exception("No file uploaded");
 
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            
 
             int insertedCount = 0;
 
