@@ -1,24 +1,20 @@
-﻿using DatabridgeServer.Data;
+using DatabridgeServer.Data;
 using DatabridgeServer.Services;
 using DatabridgeServer.Services.Employees;
-using DatabridgeServer.Services.Members;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
+<<<<<<< HEAD
+using DatabridgeServer.Services.Members;
+=======
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using OfficeOpenXml;
-
+>>>>>>> b64c7a281770773ba02c105abcde7759d6c8f877
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// EPPlus License
-ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
 // Add services to the container.
 builder.Services.AddControllers();
-
-
 
 // Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -27,8 +23,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+<<<<<<< HEAD
 builder.Services.AddScoped<IMemberService, MemberService>();
+=======
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+>>>>>>> b64c7a281770773ba02c105abcde7759d6c8f877
 
 // Add CORS policy
 builder.Services.AddCors(options =>
