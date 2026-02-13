@@ -135,3 +135,6 @@ ServiceFabricBackup/
 *.swp
 *.swo
 *~
+/DatabridgeServer/appsettings.json
+/DatabridgeServer/DatabridgeServer.csproj
+/DatabridgeServer/appsettings.json
