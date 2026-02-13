@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace DatabridgeServer.Models
 {
     public class Student
     {
+        [Key]
+        [SwaggerIgnore]
         public int StudentID { get; set; }
 
         [Required]
