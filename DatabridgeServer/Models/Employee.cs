@@ -32,5 +32,6 @@ namespace DatabridgeServer.Models
     {
         [Required]
         public List<int> EmpIds { get; set; } = new();
+        
     }
 }

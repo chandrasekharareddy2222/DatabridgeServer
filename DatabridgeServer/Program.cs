@@ -6,8 +6,9 @@ using DatabridgeServer.Services.Students;
 using DatabridgeServer.Services.Members;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using OfficeOpenXml;
 
-ExcelPackage.License.SetNonCommercialPersonal("NET");
+ExcelPackage.License.SetNonCommercialPersonal("NET"); 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

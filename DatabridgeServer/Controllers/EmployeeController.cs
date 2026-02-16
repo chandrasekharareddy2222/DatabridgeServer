@@ -112,6 +112,7 @@ namespace DatabridgeServer.Controllers
                 .DeleteMultipleEmployeesAsync(request.EmpIds);
 
             return Ok(new { Message = message });
+
             
         }
     }

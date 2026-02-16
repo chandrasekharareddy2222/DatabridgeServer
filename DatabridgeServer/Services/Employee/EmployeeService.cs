@@ -19,7 +19,7 @@ namespace DatabridgeServer.Services.Employees
         }
         public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
         {
-            return await _context.Employee
+            return await _context.Employees
                 .FromSqlRaw("EXEC SP_GetAllEmployeesFull")
                 .ToListAsync();
         }
@@ -247,7 +247,6 @@ namespace DatabridgeServer.Services.Employees
             var result = await command.ExecuteScalarAsync();
 
             return result?.ToString() ?? "Operation completed.";
-            
         }
     }
 }
