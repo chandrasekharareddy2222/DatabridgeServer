@@ -47,7 +47,6 @@ CREATE TYPE EmpIdTableType AS TABLE
 (
     EmpId INT NOT NULL
 );
-
 /*---------------------------------------------------------
         To Insert Employee Details (POST)
 -----------------------------------------------------------*/

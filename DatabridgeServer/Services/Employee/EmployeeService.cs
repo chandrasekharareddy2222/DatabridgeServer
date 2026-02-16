@@ -247,6 +247,7 @@ namespace DatabridgeServer.Services.Employees
             var result = await command.ExecuteScalarAsync();
 
             return result?.ToString() ?? "Operation completed.";
+            
         }
     }
 }

@@ -99,7 +99,7 @@ namespace DatabridgeServer.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
+        
 
         [HttpDelete("delete-multiple")]
         public async Task<IActionResult> DeleteMultipleEmployees(
@@ -112,6 +112,7 @@ namespace DatabridgeServer.Controllers
                 .DeleteMultipleEmployeesAsync(request.EmpIds);
 
             return Ok(new { Message = message });
+            
         }
     }
 }
