@@ -19,56 +19,37 @@ namespace DatabridgeServer.Services.Members
         {
             var members = new List<MemberBookDto>();
 
-            try
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand("GetAllMembers", conn)
             {
-                await using var conn = new SqlConnection(_connectionString);
-                await using var cmd = new SqlCommand(@"
-            SELECT 
-                m.Memberid,
-                m.MemberName,
-                m.MemberAge,
-                b.Bookname
-            FROM Members m
-            INNER JOIN Books b ON m.Bookid = b.Bookid
-        ", conn);
+                CommandType = CommandType.StoredProcedure
+            };
 
-                await conn.OpenAsync();
-                await using var reader = await cmd.ExecuteReaderAsync();
+            await conn.OpenAsync();
+            await using var reader = await cmd.ExecuteReaderAsync();
 
-                while (await reader.ReadAsync())
+            while (await reader.ReadAsync())
+            {
+                members.Add(new MemberBookDto
                 {
-                    members.Add(new MemberBookDto
-                    {
-                      
-                        Bookname = reader.GetString(3),
-                        MemberName = reader.GetString(1),
-                        MemberAge = reader.GetInt32(2)
-                        
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error fetching members", ex);
+                    MemberName = reader.GetString(1),
+                    MemberAge = reader.GetInt32(2),
+                    Bookname = reader.GetString(3)
+                });
             }
 
             return members;
         }
 
+
         //GET BY ID
         public async Task<MemberBookDto?> GetMemberByIdAsync(int memberId)
         {
             await using var conn = new SqlConnection(_connectionString);
-            await using var cmd = new SqlCommand(@"
-        SELECT 
-            m.Memberid,
-            m.MemberName,
-            m.MemberAge,
-            b.Bookname
-        FROM Members m
-        INNER JOIN Books b ON m.Bookid = b.Bookid
-        WHERE m.Memberid = @MemberId
-    ", conn);
+            await using var cmd = new SqlCommand("GetMemberById", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
 
             cmd.Parameters.AddWithValue("@MemberId", memberId);
 
@@ -80,12 +61,12 @@ namespace DatabridgeServer.Services.Members
 
             return new MemberBookDto
             {
-               
                 MemberName = reader.GetString(1),
                 MemberAge = reader.GetInt32(2),
                 Bookname = reader.GetString(3)
             };
         }
+
 
 
 
@@ -130,90 +111,61 @@ namespace DatabridgeServer.Services.Members
         //PUT 
         public async Task<string> UpdateMemberAsync(int id, MemberBookDto dto)
         {
-            
-            if (dto == null)
-                return "Invalid data";
-
-            if (string.IsNullOrWhiteSpace(dto.MemberName) || dto.MemberAge <= 0 || string.IsNullOrWhiteSpace(dto.Bookname))
-                return "Invalid member details";
-
-            try
+            await using var conn = new SqlConnection(_connectionString);
+            await using var cmd = new SqlCommand("UpdateMember", conn)
             {
-                await using var conn = new SqlConnection(_connectionString);
-                await using var cmd = new SqlCommand(@"
-            UPDATE Members
-            SET MemberName = @MemberName,
-                MemberAge = @MemberAge,
-                Bookid = (SELECT Bookid FROM Books WHERE Bookname = @Bookname)
-            WHERE Memberid = @Memberid
-        ", conn);
+                CommandType = CommandType.StoredProcedure
+            };
 
-                cmd.Parameters.AddWithValue("@Memberid", id);
-                cmd.Parameters.AddWithValue("@MemberName", dto.MemberName);
-                cmd.Parameters.AddWithValue("@MemberAge", dto.MemberAge);
-                cmd.Parameters.AddWithValue("@Bookname", dto.Bookname);
+            cmd.Parameters.AddWithValue("@MemberId", id);
+            cmd.Parameters.AddWithValue("@MemberName", dto.MemberName);
+            cmd.Parameters.AddWithValue("@MemberAge", dto.MemberAge);
+            cmd.Parameters.AddWithValue("@Bookname", dto.Bookname);
 
-                await conn.OpenAsync();
-                var rowsAffected = await cmd.ExecuteNonQueryAsync();
+            await conn.OpenAsync();
+            var rows = (int)await cmd.ExecuteScalarAsync();
 
-                if (rowsAffected == 0)
-                    return $"Member with ID {id} not found";
-
-                return "SUCCESS";
-            }
-            catch (Exception ex)
-            {
-                return "Error: " + ex.Message;
-            }
+            return rows == 0 ? "NOT FOUND" : "SUCCESS";
         }
+
 
         //DELETE BY MEMBER
         public async Task<string> DeleteMemberAsync(int memberId)
         {
             await using var conn = new SqlConnection(_connectionString);
-            await using var cmd = new SqlCommand(@"
-        DELETE FROM Members
-        WHERE MemberId = @MemberId;
-
-        SELECT 
-            CASE WHEN @@ROWCOUNT = 0 THEN 'NOT FOUND'
-                 ELSE 'SUCCESS'
-            END AS Message;
-    ", conn);
+            await using var cmd = new SqlCommand("DeleteMember", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
 
             cmd.Parameters.AddWithValue("@MemberId", memberId);
 
             await conn.OpenAsync();
-            await using var reader = await cmd.ExecuteReaderAsync();
+            var rows = (int)await cmd.ExecuteScalarAsync();
 
-            if (await reader.ReadAsync())
-                return reader["Message"].ToString();
-
-            return "DELETE FAILED";
+            return rows == 0 ? "NOT FOUND" : "SUCCESS";
         }
 
+        //DELETE MULTIPLE
         public async Task<int> DeleteMembersAsync(List<int> memberIds)
         {
-            if (memberIds == null || memberIds.Count == 0)
-                return 0;
-
             var ids = string.Join(",", memberIds);
 
             await using var conn = new SqlConnection(_connectionString);
-            await using var cmd = new SqlCommand($@"
-        DELETE FROM Members
-        WHERE MemberId IN ({ids});
-        SELECT @@ROWCOUNT;
-    ", conn);
+            await using var cmd = new SqlCommand("DeleteMembers", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            cmd.Parameters.AddWithValue("@Ids", ids);
 
             await conn.OpenAsync();
-            var deletedCount = (int)await cmd.ExecuteScalarAsync();
-
-            return deletedCount;
+            return (int)await cmd.ExecuteScalarAsync();
         }
-
-
-
-
     }
+
+
+
+
+    
 }
