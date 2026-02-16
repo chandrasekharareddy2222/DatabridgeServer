@@ -100,6 +100,7 @@ namespace DatabridgeServer.Controllers
             }
         }
 
+
         [HttpDelete("delete-multiple")]
         public async Task<IActionResult> DeleteMultipleEmployees(
         [FromBody] DeleteMultipleEmployeesRequest request)

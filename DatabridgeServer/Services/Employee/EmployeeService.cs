@@ -232,7 +232,6 @@ namespace DatabridgeServer.Services.Employees
             }
             using var connection = _context.Database.GetDbConnection();
             using var command = connection.CreateCommand();
-
             command.CommandText = "SP_DeleteMultipleEmployees";
             command.CommandType = CommandType.StoredProcedure;
 
