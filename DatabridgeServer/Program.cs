@@ -1,18 +1,20 @@
 using DatabridgeServer.Data;
 using DatabridgeServer.Services;
 using DatabridgeServer.Services.Employees;
+using DatabridgeServer.Services.Members;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
-using DatabridgeServer.Services.Members;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Extensions.Options;
 using OfficeOpenXml;
-
 // Set EPPlus license (REQUIRED for EPPlus 8+)
 ExcelPackage.License.SetNonCommercialPersonal("Devaraj");
 
 ExcelPackage.License.SetNonCommercialPersonal("NET");
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -26,11 +28,6 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-
-
-
-
-
 
 // Add CORS policy
 builder.Services.AddCors(options =>
