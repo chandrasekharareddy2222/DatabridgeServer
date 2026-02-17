@@ -1,6 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DatabridgeServer.Models;
 using DatabridgeServer.Services.Employees;
+using OfficeOpenXml;
+using System.Globalization;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using System.Data;
+using Microsoft.Data.SqlClient;
 
 namespace DatabridgeServer.Controllers
 {
@@ -38,21 +44,27 @@ namespace DatabridgeServer.Controllers
         {
             var message = await _employeeService
                 .AddEmployeeAsync(request.EmpName, request.DeptName);
-
-            return Ok(new { message });
+            return Ok(new
+            {
+                message = message
+            });
         }
-
+        
         [HttpPut("update-employee/{empId}")]
-        public async Task<IActionResult> UpdateEmployee(
-    int empId,
-    [FromBody] Employee request)
+        public async Task<IActionResult> UpdateEmployee(int empId, [FromBody] Employee request)
         {
-            var message = await _employeeService
-                .UpdateEmployeeAsync(empId, request.EmpName, request.DeptName);
+            var message = await _employeeService.UpdateEmployeeAsync(empId, request.EmpName, request.DeptName);
 
-            return Ok(new { message });
+            if (message == "Employee not found")
+            {
+                return NotFound(new { message });
+            }
+
+            return Ok(new
+            {
+                message = message
+            });
         }
-
 
         [HttpDelete("delete-employee/{empId}")]
         public async Task<IActionResult> DeleteEmployee(int empId)
@@ -60,6 +72,47 @@ namespace DatabridgeServer.Controllers
             var message = await _employeeService.DeleteEmployeeAsync(empId);
 
             return Ok(new { message });
+        }
+
+
+        [HttpPost("bulk-import")]
+        public async Task<IActionResult> BulkImport(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (extension != ".xlsx" && extension != ".xls" && extension!=".csv")
+            {
+                return BadRequest("Invalid file format. Please upload an Excel file (.xlsx) or CSV(.csv).");
+            }
+
+            try
+            {
+                var result = await _employeeService.BulkImportEmployeesAsync(file);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        
+        
+        [HttpDelete("delete-multiple")]
+        public async Task<IActionResult> DeleteMultipleEmployees(
+        [FromBody] DeleteMultipleEmployeesRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var message = await _employeeService
+                .DeleteMultipleEmployeesAsync(request.EmpIds);
+
+            return Ok(new { Message = message });
+
+            
         }
     }
 }

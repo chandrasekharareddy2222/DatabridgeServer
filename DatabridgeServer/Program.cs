@@ -11,6 +11,7 @@ using OfficeOpenXml;
 // Set EPPlus license (REQUIRED for EPPlus 8+)
 ExcelPackage.License.SetNonCommercialPersonal("Devaraj");
 
+ExcelPackage.License.SetNonCommercialPersonal("NET");
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -43,7 +44,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
