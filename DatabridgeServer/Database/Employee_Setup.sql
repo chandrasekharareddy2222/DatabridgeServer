@@ -17,6 +17,7 @@ CREATE TABLE IT_Sector
     DeptId INT IDENTITY(1,1) PRIMARY KEY,
     DeptName VARCHAR(50) NOT NULL UNIQUE
 );
+
 /*----------------------------------------------------------
                  TABLE: Employee
 ------------------------------------------------------------*/
@@ -40,6 +41,7 @@ CREATE TYPE EmployeeImportType AS TABLE
     DeptName VARCHAR(100)
 );
 GO
+
 /*========================================================
       deleting data multiple or single table (format (TVP))
 =========================================================*/
@@ -47,6 +49,8 @@ CREATE TYPE EmpIdTableType AS TABLE
 (
     EmpId INT NOT NULL
 );
+
+
 /*---------------------------------------------------------
         To Insert Employee Details (POST)
 -----------------------------------------------------------*/
@@ -79,6 +83,7 @@ BEGIN
         SELECT 'DeptName must not contain numbers' AS Message;
         RETURN;
     END
+
     DECLARE @DeptId INT;
     DECLARE @EmpId INT;
     IF EXISTS (SELECT 1 FROM Employee WHERE EmpName = @EmpName)
@@ -96,6 +101,7 @@ BEGIN
     INSERT INTO Employee (EmpName, DeptId)
     VALUES (@EmpName, @DeptId);
     SELECT 'Employee inserted successfully' AS Message;
+
 END;
 --exec SP_AddEmployee 'SeemaSimran','hr';
 --exec SP_AddEmployee 'Deepak','dotnet';
@@ -143,6 +149,7 @@ BEGIN
         SELECT 'Employee not found' AS Message;
         RETURN;
     END
+
     SELECT 
         e.EmpName,
         d.DeptName
@@ -158,7 +165,7 @@ END;
 /*----------------------------------------------------------------
         To Update The Employee Name (POST)
 ------------------------------------------------------------------*/
-go
+Go
 CREATE OR ALTER PROCEDURE SP_UpdateEmployeeName
 (
     @EmpId INT,

@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using OfficeOpenXml;
 
+// Set EPPlus license (REQUIRED for EPPlus 8+)
+ExcelPackage.License.SetNonCommercialPersonal("Devaraj");
+
 ExcelPackage.License.SetNonCommercialPersonal("NET");
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,10 +24,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
-
 builder.Services.AddScoped<IMemberService, MemberService>();
-
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+
+
+
 
 
 // Add CORS policy
