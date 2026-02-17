@@ -2,7 +2,6 @@
 using DatabridgeServer.Models;
 using DatabridgeServer.Services.Employees;
 using OfficeOpenXml;
-using CsvHelper;
 using System.Globalization;
 using System.IO;
 using Microsoft.AspNetCore.Http;
@@ -84,9 +83,9 @@ namespace DatabridgeServer.Controllers
                 return BadRequest("No file uploaded.");
             }
             var extension = Path.GetExtension(file.FileName).ToLower();
-            if (extension != ".xlsx" && extension != ".xls")
+            if (extension != ".xlsx" && extension != ".xls" && extension!=".csv")
             {
-                return BadRequest("Invalid file format. Please upload an Excel file (.xlsx).");
+                return BadRequest("Invalid file format. Please upload an Excel file (.xlsx) or CSV(.csv).");
             }
 
             try

@@ -39,7 +39,6 @@ CREATE TYPE EmployeeImportType AS TABLE
     EmpName VARCHAR(100),
     DeptName VARCHAR(100)
 );
-
 GO
 /*========================================================
       deleting data multiple or single table (format (TVP))

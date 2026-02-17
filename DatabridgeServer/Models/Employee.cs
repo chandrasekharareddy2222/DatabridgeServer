@@ -19,7 +19,6 @@ namespace DatabridgeServer.Models
         [StringLength(50)]
         public string DeptName { get; set; } = string.Empty;
     }
-    
     public class BulkImportResult
     {
         public int TotalRowsReceived { get; set; }

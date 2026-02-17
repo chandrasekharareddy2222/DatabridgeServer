@@ -147,35 +147,93 @@ namespace DatabridgeServer.Services.Employees
             var validEmployeesTable = new DataTable();
             validEmployeesTable.Columns.Add("EmpName", typeof(string));
             validEmployeesTable.Columns.Add("DeptName", typeof(string));
+
+            var extension = Path.GetExtension(file.FileName).ToLower();
+
             using (var stream = new MemoryStream())
             {
                 await file.CopyToAsync(stream);
-                using (var package = new ExcelPackage(stream))
+                stream.Position = 0;
+                
+                if (extension == ".csv")
                 {
-                    var worksheet = package.Workbook.Worksheets[0];
-                    if (worksheet.Dimension == null) return result;
-
-                    var rowCount = worksheet.Dimension.Rows;
-
-                    for (int row = 2; row <= rowCount; row++)
+                    using (var reader = new StreamReader(stream))
                     {
-                        var empNameRaw = worksheet.Cells[row, 1].Value?.ToString()?.Trim();
-                        var deptNameRaw = worksheet.Cells[row, 2].Value?.ToString()?.Trim();
+                        int row = 1;
 
-                        if (string.IsNullOrWhiteSpace(empNameRaw) ||
-                            string.IsNullOrWhiteSpace(deptNameRaw) ||
-                            empNameRaw.Equals("null", StringComparison.OrdinalIgnoreCase) ||
-                            deptNameRaw.Equals("null", StringComparison.OrdinalIgnoreCase))
+                        while (!reader.EndOfStream)
                         {
-                            result.ValidationErrors.Add($"Row {row}: Skipped (Empty or Null values)");
-                            continue;
+                            var line = await reader.ReadLineAsync();
+
+                            if (row == 1)
+                            {
+                                row++;
+                                continue;
+                            }
+
+                            var values = line.Split(',');
+
+                            if (values.Length < 2)
+                            {
+                                result.ValidationErrors.Add($"Row {row}: Invalid format");
+                                row++;
+                                continue;
+                            }
+
+                            var empNameRaw = values[0]?.Trim();
+                            var deptNameRaw = values[1]?.Trim();
+
+                            if (string.IsNullOrWhiteSpace(empNameRaw) ||
+                                string.IsNullOrWhiteSpace(deptNameRaw) ||
+                                empNameRaw.Equals("null", StringComparison.OrdinalIgnoreCase) ||
+                                deptNameRaw.Equals("null", StringComparison.OrdinalIgnoreCase))
+                            {
+                                result.ValidationErrors.Add($"Row {row}: Skipped (Empty or Null values)");
+                                row++;
+                                continue;
+                            }
+
+                            if (!Regex.IsMatch(empNameRaw, "^[a-zA-Z]") ||
+                                !Regex.IsMatch(deptNameRaw, "^[a-zA-Z]"))
+                            {
+                                result.ValidationErrors.Add($"Row {row}: Skipped (Names must start with a letter)");
+                                row++;
+                                continue;
+                            }
+                            validEmployeesTable.Rows.Add(empNameRaw, deptNameRaw);
+                            row++;
                         }
-                        if (!Regex.IsMatch(empNameRaw, "^[a-zA-Z]") || !Regex.IsMatch(deptNameRaw, "^[a-zA-Z]"))
+                    }
+                }
+                else
+                {
+                    using (var package = new ExcelPackage(stream))
+                    {
+                        var worksheet = package.Workbook.Worksheets[0];
+                        if (worksheet.Dimension == null) return result;
+
+                        var rowCount = worksheet.Dimension.Rows;
+
+                        for (int row = 2; row <= rowCount; row++)
                         {
-                            result.ValidationErrors.Add($"Row {row}: Skipped (Names must start with a letter)");
-                            continue;
+                            var empNameRaw = worksheet.Cells[row, 1].Value?.ToString()?.Trim();
+                            var deptNameRaw = worksheet.Cells[row, 2].Value?.ToString()?.Trim();
+
+                            if (string.IsNullOrWhiteSpace(empNameRaw) ||
+                                string.IsNullOrWhiteSpace(deptNameRaw) ||
+                                empNameRaw.Equals("null", StringComparison.OrdinalIgnoreCase) ||
+                                deptNameRaw.Equals("null", StringComparison.OrdinalIgnoreCase))
+                            {
+                                result.ValidationErrors.Add($"Row {row}: Skipped (Empty or Null values)");
+                                continue;
+                            }
+                            if (!Regex.IsMatch(empNameRaw, "^[a-zA-Z]") || !Regex.IsMatch(deptNameRaw, "^[a-zA-Z]"))
+                            {
+                                result.ValidationErrors.Add($"Row {row}: Skipped (Names must start with a letter)");
+                                continue;
+                            }
+                            validEmployeesTable.Rows.Add(empNameRaw, deptNameRaw);
                         }
-                        validEmployeesTable.Rows.Add(empNameRaw, deptNameRaw);
                     }
                 }
             }
