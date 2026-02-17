@@ -9,7 +9,8 @@ namespace DatabridgeServer.Services.Employees
         Task<string> AddEmployeeAsync(string empName, string deptName);
         Task<string> UpdateEmployeeAsync(int empId, string empName, string deptName);
         Task<string> DeleteEmployeeAsync(int empId);
-        Task<BulkImportResult> BulkImportEmployeesAsync(IFormFile file);
-        Task<string> DeleteMultipleEmployeesAsync(List<int> empIds); 
+
+
+
     }
 }
