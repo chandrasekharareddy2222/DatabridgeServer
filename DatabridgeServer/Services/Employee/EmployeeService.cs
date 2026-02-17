@@ -303,7 +303,7 @@ namespace DatabridgeServer.Services.Employees
                 await connection.OpenAsync();
 
             var result = await command.ExecuteScalarAsync();
-
+            
             return result?.ToString() ?? "Operation completed.";
         }
     }
