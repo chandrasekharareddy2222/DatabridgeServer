@@ -157,8 +157,16 @@ namespace DatabridgeServer.Services.Students
             command.Parameters.AddWithValue("@Age", student.Age);
             command.Parameters.AddWithValue("@DeptName", student.DeptName);
 
-            await connection.OpenAsync();
-            await command.ExecuteNonQueryAsync();
+            try
+            {
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
+            }
+            catch (SqlException ex)
+            {
+                // This will catch RAISERROR messages from SQL
+                throw; // or handle it in a nicer way
+            }
         }
 
         // ============================

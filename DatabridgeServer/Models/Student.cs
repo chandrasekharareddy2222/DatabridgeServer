@@ -7,10 +7,12 @@ namespace DatabridgeServer.Models
     {
         [Key]
         [SwaggerIgnore]
+        
         public int StudentID { get; set; }
 
         [Required]
         [StringLength(100)]
+       
         public string StudentName { get; set; } = string.Empty;
 
         [Required]

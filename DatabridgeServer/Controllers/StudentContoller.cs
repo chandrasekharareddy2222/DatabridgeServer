@@ -52,13 +52,18 @@ namespace DatabridgeServer.Controllers
         }
 
         // ==============================
-        // CREATE STUDENT
+        // CREATE STUDENT(POST)
         // ==============================
         [HttpPost]
         public async Task<IActionResult> PostStudent([FromBody] Student student)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+            if (!System.Text.RegularExpressions.Regex.IsMatch(student.StudentName, @"^[A-Za-z]+$"))
+            {
+                return BadRequest(new { message = "Student name must contain only alphabets." });
+            }
+
 
             try
             {
@@ -122,6 +127,12 @@ namespace DatabridgeServer.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            //  Added same validation as POST
+            if (!System.Text.RegularExpressions.Regex.IsMatch(student.StudentName, @"^[A-Za-z]+$"))
+            {
+                return BadRequest(new { message = "Student name must contain only alphabets." });
+            }
+
             try
             {
                 var updated = await _studentService.UpdateStudentAsync(id, student);
@@ -140,6 +151,7 @@ namespace DatabridgeServer.Controllers
                 return StatusCode(500, new { message = "Internal server error. Please try again." });
             }
         }
+
 
         // ==============================
         // DELETE STUDENT
