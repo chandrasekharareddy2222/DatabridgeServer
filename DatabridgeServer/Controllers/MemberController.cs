@@ -11,9 +11,11 @@ namespace DatabridgeServer.Controllers
     {
         private readonly IMemberService _MemberService;
 
-        public MemberController(IMemberService MemberService)
+      
+
+        public MemberController(IMemberService memberService)
         {
-            _MemberService = MemberService;
+            _MemberService = memberService;
         }
 
 
@@ -108,11 +110,31 @@ namespace DatabridgeServer.Controllers
             });
         }
 
+        
 
 
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadMembers([FromForm] UploadMemberDto dto)
+        {
+            if (dto.File == null || dto.File.Length == 0)
+                return BadRequest("File is required");
 
+            var extension = Path.GetExtension(dto.File.FileName).ToLower();
 
+            if (extension != ".xlsx" && extension != ".csv")
+                return BadRequest("Only XLSX and CSV files are allowed");
 
+            var result = await _MemberService.ProcessFileAsync(dto.File);
+
+            return Ok(result);
+        }
 
     }
+
+
+
+
+
+
 }

@@ -1,10 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace DatabridgeServer.Models
 {
     public class MemberBookDto
     {
-        
+       
+        [SwaggerIgnore]
+        public int Memberid { get; set; }
 
         [Required]
         public string Bookname { get; set; }
@@ -15,4 +18,11 @@ namespace DatabridgeServer.Models
         [Range(1, 79, ErrorMessage = "Member age must be less than 80")]
         public int MemberAge {  get; set; }
     }
+    public class UploadMemberDto
+    {
+        [Required]
+        public IFormFile File { get; set; }
+    }
+
+
 }

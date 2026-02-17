@@ -13,7 +13,7 @@ CREATE TABLE Members
    CONSTRAINT FK_Members_Books
    FOREIGN KEY (Bookid) REFERENCES Books(Bookid)
 );
-
+go
  CREATE OR ALTER PROCEDURE InsertMemberandBooks
 (
     @BookName   VARCHAR(50),
