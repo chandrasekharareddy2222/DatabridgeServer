@@ -1,5 +1,4 @@
 ﻿using DatabridgeServer.Data;
-using DatabridgeServer.Models;
 using DatabridgeServer.Services;
 using DatabridgeServer.Services.Employees;
 using DatabridgeServer.Services.Members;
@@ -9,9 +8,10 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using DatabridgeServer.Validators;
 using Microsoft.EntityFrameworkCore;
-
 using Microsoft.Extensions.Options;
 using OfficeOpenXml;
+using DatabridgeServer.Models;
+
 // Set EPPlus license (REQUIRED for EPPlus 8+)
 ExcelPackage.License.SetNonCommercialPersonal("Devaraj");
 
