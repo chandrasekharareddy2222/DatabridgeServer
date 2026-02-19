@@ -1,4 +1,5 @@
-﻿using Swashbuckle.AspNetCore.Annotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -11,12 +12,8 @@ namespace DatabridgeServer.Models
         [SwaggerIgnore]
         public int EmpId { get; set; }
 
-        [Required]
-        [StringLength(50)]
         public string EmpName { get; set; } = string.Empty; 
 
-        [Required]
-        [StringLength(50)]
         public string DeptName { get; set; } = string.Empty;
     }
     public class BulkImportResult
@@ -29,8 +26,20 @@ namespace DatabridgeServer.Models
     }
     public class DeleteMultipleEmployeesRequest
     {
-        [Required]
         public List<int> EmpIds { get; set; } = new();
         
+    }
+
+    // Wraps the route parameter for GET by ID and DELETE
+    public class EmployeeIdRequest
+    {
+        [FromRoute(Name = "empId")] // Maps the {empId} from the URL to this property
+        public int EmpId { get; set; }
+    }
+
+    // Wraps the IFormFile for Bulk Import
+    public class FileImportRequest
+    {
+        public IFormFile File { get; set; }
     }
 }

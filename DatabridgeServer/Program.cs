@@ -4,10 +4,14 @@ using DatabridgeServer.Services.Employees;
 using DatabridgeServer.Services.Members;
 using DatabridgeServer.Services.Products;
 using DatabridgeServer.Services.Students;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using DatabridgeServer.Validators;
 using Microsoft.EntityFrameworkCore;
-
 using Microsoft.Extensions.Options;
 using OfficeOpenXml;
+using DatabridgeServer.Models;
+
 // Set EPPlus license (REQUIRED for EPPlus 8+)
 ExcelPackage.License.SetNonCommercialPersonal("Devaraj");
 
@@ -18,6 +22,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<EmployeeRequestValidator>();
+
 
 // Configure Entity Framework Core with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
