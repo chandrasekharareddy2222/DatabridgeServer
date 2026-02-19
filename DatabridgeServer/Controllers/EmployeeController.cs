@@ -15,6 +15,8 @@ namespace DatabridgeServer.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
+        private static List<Employee> _memoryEmployees = new();
+        private static int _memoryIdCounter = 1;
 
         public EmployeesController(IEmployeeService employeeService)
         {
@@ -28,10 +30,22 @@ namespace DatabridgeServer.Controllers
             return Ok(employees);
         }
 
+        //[HttpGet("get-employee/{empId}")]
+        //public async Task<IActionResult> GetEmployee(int empId)
+        //{
+        //    var result = await _employeeService.GetEmployeeByIdAsync(empId);
+
+        //    if (result.employee == null)
+        //        return NotFound(new { message = result.message });
+
+        //    return Ok(result.employee);
+        //}
         [HttpGet("get-employee/{empId}")]
-        public async Task<IActionResult> GetEmployee(int empId)
+        // CHANGE 1: Replace 'int empId' with the wrapper class
+        public async Task<IActionResult> GetEmployee([FromRoute] EmployeeIdRequest request)
         {
-            var result = await _employeeService.GetEmployeeByIdAsync(empId);
+            // CHANGE 2: Access the ID using 'request.EmpId'
+            var result = await _employeeService.GetEmployeeByIdAsync(request.EmpId);
 
             if (result.employee == null)
                 return NotFound(new { message = result.message });
@@ -50,10 +64,10 @@ namespace DatabridgeServer.Controllers
             });
         }
         
-        [HttpPut("update-employee/{empId}")]
-        public async Task<IActionResult> UpdateEmployee(int empId, [FromBody] Employee request)
+        [HttpPut("update-employee/{empId}")]        
+        public async Task<IActionResult> UpdateEmployee([FromRoute] EmployeeIdRequest idRequest, [FromBody] Employee request)
         {
-            var message = await _employeeService.UpdateEmployeeAsync(empId, request.EmpName, request.DeptName);
+            var message = await _employeeService.UpdateEmployeeAsync(idRequest.EmpId, request.EmpName, request.DeptName);
 
             if (message == "Employee not found")
             {
@@ -65,6 +79,7 @@ namespace DatabridgeServer.Controllers
                 message = message
             });
         }
+
 
         [HttpDelete("delete-employee/{empId}")]
         public async Task<IActionResult> DeleteEmployee(int empId)
@@ -111,8 +126,7 @@ namespace DatabridgeServer.Controllers
                 .DeleteMultipleEmployeesAsync(request.EmpIds);
 
             return Ok(new { Message = message });
-
-            
+  
         }
     }
 }
